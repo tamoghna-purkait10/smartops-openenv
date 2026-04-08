@@ -10,3 +10,10 @@ env = SmartOpsEnv(TASKS["easy"])
 async def reset():
     obs = await env.reset()
     return {"status": "ok", "observation": obs.dict()}
+    
+@app.get("/")
+async def home():
+    return {
+        "message": "SmartOps OpenEnv is running",
+        "usage": "POST /reset to start environment"
+    }
