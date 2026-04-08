@@ -5,8 +5,8 @@ from env.tasks import TASKS
 from env.models import Action
 
 API_KEY = os.getenv("HF_TOKEN")
-API_BASE_URL = os.getenv("API_BASE_URL")
-MODEL_NAME = os.getenv("MODEL_NAME")
+API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 
 client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
 
