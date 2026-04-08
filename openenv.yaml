@@ -1,0 +1,7 @@
+name: smartops_env
+description: Customer support triage simulation
+version: 1.0
+tasks:
+  - easy
+  - medium
+  - hard
