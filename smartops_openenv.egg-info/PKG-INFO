@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: smartops-openenv
+Version: 0.1.0
+Summary: Customer support triage environment for OpenEnv hackathon
+Author: Tamoghna
+Requires-Python: >=3.10
+Requires-Dist: fastapi==0.110.0
+Requires-Dist: uvicorn==0.29.0
+Requires-Dist: pydantic==2.6.4
+Requires-Dist: openai>=2.7.2
+Requires-Dist: sentence-transformers==2.7.0
+Requires-Dist: torch==2.2.2
+Requires-Dist: openenv-core>=0.2.0

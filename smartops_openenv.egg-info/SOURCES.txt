@@ -1,0 +1,9 @@
+README.md
+pyproject.toml
+server/app.py
+smartops_openenv.egg-info/PKG-INFO
+smartops_openenv.egg-info/SOURCES.txt
+smartops_openenv.egg-info/dependency_links.txt
+smartops_openenv.egg-info/entry_points.txt
+smartops_openenv.egg-info/requires.txt
+smartops_openenv.egg-info/top_level.txt
