@@ -5,19 +5,30 @@ from env.tasks import TASKS
 
 app = FastAPI()
 
-env = SmartOpsEnv(TASKS["easy"])
+env = None  # lazy init
+
+
+def get_env():
+    global env
+    if env is None:
+        env = SmartOpsEnv(TASKS["easy"])
+    return env
+
 
 @app.get("/")
 async def home():
     return {
-        "message": "SmartOps OpenEnv is running",
-        "usage": "POST /reset to start environment"
+        "message": "SmartOps OpenEnv running",
+        "usage": "POST /reset"
     }
+
 
 @app.post("/reset")
 async def reset():
-    obs = await env.reset()
+    env_instance = get_env()
+    obs = await env_instance.reset()
     return {"status": "ok", "observation": obs.dict()}
+
 
 def main():
     uvicorn.run(
@@ -26,6 +37,7 @@ def main():
         port=7860,
         reload=False
     )
+
 
 if __name__ == "__main__":
     main()
