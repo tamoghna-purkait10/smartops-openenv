@@ -10,8 +10,8 @@ env = SmartOpsEnv(TASKS["easy"])
 @app.get("/")
 async def home():
     return {
-        "message": "SmartOps OpenEnv running",
-        "usage": "POST /reset"
+        "message": "SmartOps OpenEnv is running",
+        "usage": "POST /reset to start environment"
     }
 
 @app.post("/reset")
