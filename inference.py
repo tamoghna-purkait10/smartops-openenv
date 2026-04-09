@@ -21,41 +21,91 @@ def log_end(success, steps, score, rewards):
     print(f"[END] success={str(success).lower()} steps={steps} score={score:.2f} rewards={rewards_str}", flush=True)
 
 def get_action(obs):
-    prompt = f"Classify and respond:\nMessage: {obs.customer_message}\nReturn JSON with priority, department, response"
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.2
-    )
     try:
-        data = json.loads(response.choices[0].message.content)
-        return Action(**data)
-    except:
-        return Action(priority="medium", department="general", response="We are reviewing your issue.")
+        prompt = f"Classify and respond:\nMessage: {obs.customer_message}"
+
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2
+        )
+
+        content = response.choices[0].message.content.strip()
+
+        try:
+            data = json.loads(content)
+            return Action(**data)
+        except Exception:
+            return Action(
+                priority="medium",
+                department="general",
+                response=content[:100]
+            )
+
+    except Exception as e:
+        print(f"[DEBUG] LLM failed: {e}", flush=True)
+        return Action(
+            priority="medium",
+            department="general",
+            response="We are reviewing your issue."
+        )
 
 async def run_task(name):
     env = SmartOpsEnv(TASKS[name])
-    obs = await env.reset()
+    rewards = []
+    steps = 0
+    score = 0.0
+    success = False
+
     log_start(name, "smartops_env", MODEL_NAME)
 
-    rewards = []
-    for step in range(1,5):
-        action = get_action(obs)
-        result = await env.step(action)
+    try:
+        obs = await env.reset()
 
-        log_step(step, str(action), result["reward"], result["done"], None)
+        for step in range(1, 6):
+            try:
+                action = get_action(obs)
 
-        rewards.append(result["reward"])
-        if result["done"]:
-            break
-        obs = result["observation"]
+                result = await env.step(action)
 
-    score = sum(rewards)/len(rewards)
-    log_end(score>0.5, len(rewards), score, rewards)
+                reward = result.get("reward", 0.0)
+                done = result.get("done", False)
+
+                log_step(step, str(action), reward, done, None)
+
+                rewards.append(reward)
+                steps = step
+
+                if done:
+                    break
+
+                obs = result.get("observation")
+
+            except Exception as step_error:
+                print(f"[DEBUG] Step error: {step_error}", flush=True)
+                log_step(step, "error", 0.0, True, str(step_error))
+                break
+
+        if rewards:
+            score = sum(rewards) / len(rewards)
+        else:
+            score = 0.0
+
+        success = score > 0.5
+
+    except Exception as e:
+        print(f"[DEBUG] Task failed: {e}", flush=True)
+
+    finally:
+        log_end(success, steps, score, rewards)
 
 async def main():
-    for t in ["easy","medium","hard"]:
-        await run_task(t)
+    for t in ["easy", "medium", "hard"]:
+        try:
+            await run_task(t)
+        except Exception as e:
+            print(f"[DEBUG] Fatal error in task {t}: {e}", flush=True)
+            log_end(False, 0, 0.0, [])
 
 if __name__=="__main__":
     asyncio.run(main())
